@@ -1,0 +1,35 @@
+import { Router } from "express";
+
+import * as product from "../Controller/ProductController";
+import { upLoadsProducts } from "../Lib/Multer";
+import { verifyToken } from "../Middleware/ValidateToken";
+
+const router = Router();
+
+router.post("/add-new-products", product.getproducthomescreen);
+
+//main banner
+router.post("/product_screen_banner", product.product_screen_banner);
+
+//main categories at top bar
+router.get("/getmainproduct-category", product.getproduct_main_categories);
+
+//dropdowns
+router.post("/select-product-main-category", product.select_product_main);
+router.post("/select-product-sub-category", product.select_product_sub);
+router.get("/select-product-brand", product.select_product_brand);
+
+//get all products by main category
+router.post("/products-bycategory", product.get_main_all_products);
+router.post(
+  "/category_condition_productslist",
+  product.category_condition_productslist
+);
+router.post("/all_products_bybrand", product.all_products_bybrand);
+
+//product deatils
+router.post("/product_details", product.product_details);
+
+router.post("/getmainproduct-page", product.get_main_productpage);
+
+export default router;
