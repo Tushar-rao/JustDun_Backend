@@ -83,4 +83,8 @@ app.use("/api", payroute);
 app.use(express.static(path.join(__dirname, "Uploads/Profile")));
 app.use(express.static(path.join(__dirname, "Uploads/Products")));
 
+app.get("/", function (req, res) {
+  res.send("<h1>Hey It's Working!</h1>");
+});
+
 export default httpServer;
