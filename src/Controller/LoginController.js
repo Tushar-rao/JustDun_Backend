@@ -191,6 +191,7 @@ export const renewTokenLogin = async (req, res = response) => {
       token,
     });
   } catch (e) {
+    console.log(e);
     res.status(500).json({
       resp: false,
       msg: e,
