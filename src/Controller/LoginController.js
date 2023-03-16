@@ -160,9 +160,10 @@ export const loginController = async (req, res = response) => {
       }
     }
   } catch (e) {
+    console.log(e);
     return res.status(500).json({
       resp: false,
-      msg: e,
+      message: { msg: e },
     });
   }
 };
