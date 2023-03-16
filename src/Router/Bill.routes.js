@@ -1,6 +1,6 @@
 import { Router } from "express";
-import * as billing from "../Controller/BillingController";
-import { verifyToken } from "../Middleware/ValidateToken";
+import * as billing from "../Controller/BillingController.js";
+import { verifyToken } from "../Middleware/ValidateToken.js";
 
 const router = Router();
 

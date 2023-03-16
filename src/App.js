@@ -3,28 +3,32 @@ import path from "path";
 import { config } from "dotenv";
 
 import { createServer } from "http";
-import Server from "socket.io";
-import { socketOrderDelivery } from "./Sockets/SocketOrderDelivery";
+import { socketOrderDelivery } from "./Sockets/SocketOrderDelivery.js";
 
-import routeAuth from "./Router/Auth.routes";
-import routerUser from "./Router/User.routes";
-import routerProduct from "./Router/Product.routes";
-import routerOrder from "./Router/Order.routes";
-import routerlocaiton from "./Router/Location.routes";
-import routerbilling from "./Router/Bill.routes";
-import routeruserservices from "./Router/UserServices.routes";
-import routerstory from "./Router/Stories.routes";
-import payroute from "./Router/Payments.routes";
+import routeAuth from "./Router/Auth.routes.js";
+import routerUser from "./Router/User.routes.js";
+import routerProduct from "./Router/Product.routes.js";
+import routerOrder from "./Router/Order.routes.js";
+import routerlocaiton from "./Router/Location.routes.js";
+import routerbilling from "./Router/Bill.routes.js";
+import routeruserservices from "./Router/UserServices.routes.js";
+import routerstory from "./Router/Stories.routes.js";
+import payroute from "./Router/Payments.routes.js";
+import { Server } from "socket.io";
 
+import { fileURLToPath } from "url";
 config();
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
 
 // CONFIG SOCKET
 const httpServer = createServer(app);
 // const io = new Server(httpServer);
 
-const socketIO = require("socket.io")(httpServer, {
+const socketIO = new Server(httpServer, {
   cors: {
     origin: "<http://localhost:7070>",
   },

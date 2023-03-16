@@ -1,7 +1,7 @@
 import { response } from "express";
 import bcrypt from "bcrypt";
-import pool from "../Database/mysql";
-import { generateJsonWebToken } from "../Lib/JwToken";
+import pool from "../Database/mysql.js";
+import { generateJsonWebToken } from "../Lib/JwToken.js";
 
 function getData(query) {
   return new Promise((resolve, reject) => {

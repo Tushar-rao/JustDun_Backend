@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import * as product from "../Controller/ProductController";
-import { upLoadsProducts } from "../Lib/Multer";
-import { verifyToken } from "../Middleware/ValidateToken";
+import * as product from "../Controller/ProductController.js";
+import { upLoadsProducts } from "../Lib/Multer.js";
+import { verifyToken } from "../Middleware/ValidateToken.js";
 
 const router = Router();
 

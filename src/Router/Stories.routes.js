@@ -1,6 +1,6 @@
 import { Router } from "express";
-import * as story from "../Controller/StoriesController";
-import { upLoadsProfile } from "../Lib/Multer";
+import * as story from "../Controller/StoriesController.js";
+import { upLoadsProfile } from "../Lib/Multer.js";
 const router = Router();
 
 router.post("/user-stories", story.getuserconnectedstories);

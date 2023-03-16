@@ -1,5 +1,5 @@
 import { response } from "express";
-import pool from "../Database/mysql";
+import pool from "../Database/mysql.js";
 
 function getData(query) {
   return new Promise((resolve, reject) => {

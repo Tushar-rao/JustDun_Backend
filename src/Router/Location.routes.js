@@ -1,6 +1,6 @@
 import { Router } from "express";
-import * as location from "../Controller/LocationController";
-import { upLoadsProducts } from "../Lib/Multer";
+import * as location from "../Controller/LocationController.js";
+import { upLoadsProducts } from "../Lib/Multer.js";
 const router = Router();
 
 router.get("/get-states", location.statecontroller);
