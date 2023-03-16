@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Restaurant Backend ",
   "main": "index.js",
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
     "start": "babel-node src/index.js",
     "dev": "nodemon src/index.js --exec babel-node"
