@@ -7,5 +7,6 @@ const router = Router();
 // router.post("/billingdetails", verifyToken, billing.billing_controller);
 router.post("/billingdetails", billing.billing_controller);
 router.post("/create-new-ledger", billing.create_new_ledger);
+router.post("/refer-earn-page", billing.referearn_page);
 
 export default router;

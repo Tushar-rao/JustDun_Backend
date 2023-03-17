@@ -6,6 +6,7 @@ const router = Router();
 
 // router.post('/add-new-servicecart', verifyToken, orders.addNewOrders );
 router.post("/add-new-servicecart", orders.addNewOrders);
+router.post("/book-new-services", orders.book_Services);
 router.get(
   "/get-orders-by-status/:statusOrder",
   verifyToken,

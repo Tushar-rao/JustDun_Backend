@@ -192,3 +192,71 @@ export const create_new_ledger = async (req, res = response) => {
     });
   }
 };
+
+export const referearn_page = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+    const validatedUserEmail = await pool.query(
+      `SELECT * FROM users WHERE profileid='${profileid}' and status=1`
+    );
+    const user = validatedUserEmail[0];
+
+    const total_share = await getData(
+      `SELECT sum(counter) as counter FROM vendor WHERE refferalcode='${user.jdbdid}'`
+    ).then((row) => {
+      return row;
+    });
+    const total_share_price = [...total_share];
+    const approved = await getData(
+      `SELECT sum(counter) as counter FROM vendor WHERE refferalcode='${user.jdbdid}' and activated=1`
+    ).then((row) => {
+      return row;
+    });
+    const approved_price = [...approved];
+    const pending = await getData(
+      `SELECT sum(counter) as counter FROM vendor WHERE refferalcode='${user.jdbdid}' and activated=2`
+    ).then((row) => {
+      return row;
+    });
+    const pending_price = [...pending];
+    const cancelled = await getData(
+      `SELECT sum(counter) as counter FROM vendor WHERE refferalcode='${user.jdbdid}' and activated=3`
+    ).then((row) => {
+      return row;
+    });
+    const cancelled_price = [...cancelled];
+
+    res.json({
+      resp: true,
+      msg: {
+        userid: user.jdbdid,
+        userstatus: user.jdbdstatus,
+        active: user.activepending,
+        total_share:
+          total_share_price[0].counter != null
+            ? total_share_price[0]?.counter
+            : 0,
+        approved_price:
+          (approved_price[0].counter != null) != 0
+            ? approved_price[0]?.counter
+            : 0,
+        pending_price:
+          (pending_price[0].counter != null) != 0
+            ? pending_price[0]?.counter
+            : 0,
+        cancelled_price:
+          (cancelled_price[0].counter != null) != 0
+            ? cancelled_price[0]?.counter
+            : 0,
+        earning: user.earning,
+        paidamount: user.paidamount,
+        payableamount: user.payableamount,
+      },
+    });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};

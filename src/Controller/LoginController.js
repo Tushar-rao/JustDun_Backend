@@ -345,6 +345,9 @@ export const getUserbyid = async (req, res = response) => {
           image: user.profileimage,
           email: user.email,
           mainId: user.profileid,
+          phone: user.phone,
+          address: user.address,
+          pincode: user.pincode,
           type: "user",
         },
         token,
@@ -371,6 +374,9 @@ export const getUserbyid = async (req, res = response) => {
               image: user.shopphoto,
               email: user.email,
               mainId: user.vendorid,
+              phone: user.phone,
+              address: user.address,
+              pincode: user.pincode,
               type: "vendor",
             },
             token,
@@ -396,6 +402,9 @@ export const getUserbyid = async (req, res = response) => {
               image: user.shopphoto,
               email: user.email,
               mainId: user.vendorid,
+              phone: user.phone,
+              address: user.address,
+              pincode: user.pincode,
               type: "vendor",
             },
             token,
@@ -421,6 +430,9 @@ export const getUserbyid = async (req, res = response) => {
               image: user.shopphoto,
               email: user.email,
               mainId: user.vendorid,
+              phone: user.phone,
+              address: user.address,
+              pincode: user.pincode,
               type: "vendor",
             },
             token,
@@ -444,6 +456,110 @@ export const getUserbyid = async (req, res = response) => {
     return res.status(500).json({
       resp: false,
       msg: e,
+    });
+  }
+};
+
+export const update_profile = async (req, res = response) => {
+  try {
+    const { name, email, phone, pincode, address, profileid } = req.body;
+    const select = `UPDATE users SET name='${name}',email='${email}',phone='${phone}',pincode='${pincode}',address='${address}' WHERE profileid='${profileid}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Updated Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+export const update_password = async (req, res = response) => {
+  try {
+    const { newpassword, profileid } = req.body;
+    const select = `UPDATE users SET password='${newpassword}' WHERE profileid='${profileid}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Updated Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+
+export const getuser_address = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+    const select = `SELECT * FROM user_address WHERE profileid='${profileid}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Updated Successfully`,
+          data: run,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+export const getuser_old_pass = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const select = `SELECT * FROM users WHERE profileid='${profileid}'`;
+    const validatedVendorEmail = await pool.query(select);
+
+    res.json({
+      resp: true,
+      msg: `Updated Successfully`,
+      data: validatedVendorEmail[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
     });
   }
 };
