@@ -3,17 +3,22 @@ import bcrypt from "bcrypt";
 import pool from "../Database/mysql.js";
 
 export const registerClient = async (req, res = response) => {
-  const { firstname, lastname, phone, email, password, notification_token } =
-    req.body;
+  const {
+    name,
+    email,
+    password,
+    phone,
+    state,
+    city,
+    area,
+    pincode,
+    refferalcode,
+  } = req.body;
   const imagePath = req.file.filename;
 
   try {
-    let salt = bcrypt.genSaltSync();
-    const pass = bcrypt.hashSync(password, salt);
-
     const validatedEmail = await pool.query(
-      "SELECT email FROM users WHERE email = ?",
-      [email]
+      `SELECT * FROM users WHERE phone='${name}'`
     );
 
     if (validatedEmail.length > 0) {
@@ -23,21 +28,28 @@ export const registerClient = async (req, res = response) => {
       });
     }
 
-    await pool.query(`CALL SP_REGISTER(?,?,?,?,?,?,?,?);`, [
-      firstname,
-      lastname,
-      phone,
-      imagePath,
-      email,
-      pass,
-      2,
-      notification_token,
-    ]);
+    await pool
+      .query(
+        `INSERT INTO users (name,email,password,phone,state,city,area,pincode,refferalcode,wallets,profileid,jdbdid,jdbdstatus,login_type,date,time,status,counter) VALUES('${name}','${email}','${password}','${phone}','${state}','${city}','${area}','${pincode}','${refferalcode}','${wallets}','${profileid}','${jdbdid}','${jdbdstatus}','${login_type}','${date}','${time}','${status}','${counter}')`
+      )
+      .then((e) => {
+        return pool.query(`SELECT sum(counter) as counter FROM users`);
+      })
 
-    res.json({
-      resp: true,
-      msg: "Client successfully registered",
-    });
+      .then((run) => {
+        console.log(run);
+        return res.json({
+          resp: true,
+          msg: "Added successfully",
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
   } catch (err) {
     return res.status(500).json({
       resp: false,

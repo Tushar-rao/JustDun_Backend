@@ -563,3 +563,24 @@ export const getuser_old_pass = async (req, res = response) => {
     });
   }
 };
+
+export const getvendorscanner = async (req, res = response) => {
+  try {
+    const { vendor_id } = req.body;
+
+    const select = `SELECT * FROM vendor WHERE vendorid='${vendor_id}'and status=1`;
+    const validatedVendorEmail = await pool.query(select);
+
+    res.json({
+      resp: true,
+      msg: `Got Vendor Successfully`,
+      data: validatedVendorEmail[0],
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};

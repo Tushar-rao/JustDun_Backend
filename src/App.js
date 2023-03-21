@@ -86,6 +86,8 @@ app.use("/api", payroute);
 
 app.use(express.static(path.join(__dirname, "Uploads/Profile")));
 app.use(express.static(path.join(__dirname, "Uploads/Products")));
+app.use(express.static(path.join(__dirname, "Uploads/Chats")));
+app.use(express.static(path.join(__dirname, "Uploads/Stories")));
 
 app.get("/", function (req, res) {
   res.send("<h1>Hey It's Working!</h1>");
