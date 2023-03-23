@@ -6,11 +6,7 @@ import { upLoadsProfile } from "../Lib/Multer.js";
 
 const router = Router();
 
-router.post(
-  "/register-client",
-  upLoadsProfile.single("image"),
-  register.registerClient
-);
+router.post("/register-user", register.registerUser);
 router.post(
   "/register-delivery",
   [verifyToken, upLoadsProfile.single("image")],

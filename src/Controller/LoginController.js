@@ -584,3 +584,31 @@ export const getvendorscanner = async (req, res = response) => {
     });
   }
 };
+
+export const delete_user = async (req, res = response) => {
+  try {
+    const { userId } = req.body;
+    const select = `DELETE FROM users WHERE profileid='${userId}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Deleted Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
