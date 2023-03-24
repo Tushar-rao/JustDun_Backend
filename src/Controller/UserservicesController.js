@@ -243,41 +243,6 @@ export const available_seates = async (req, res = response) => {
   }
 };
 
-// export const available_bookingtime = async (req, res = response) => {
-//   try {
-//     const { vendorid } = req.body;
-//     const alltimings = `SELECT * FROM bookingtime WHERE status=1 ORDER BY id ASC`;
-//     const previousbookings = `SELECT * FROM booking WHERE slottime='${row[id]}' and slotdate='${slotdate}' and seatnumber='${seatnumber}' and vendorid='${vendorid}'`;
-//     const query = `SELECT * FROM availableseat WHERE vendorid='${vendorid}' and status=1 ORDER BY id ASC`;
-//     getData(query)
-//       .then((run) => {
-//         if (run.length != 0) {
-//           res.json({
-//             resp: true,
-//             msg: "Got Services SuccessFull",
-//             cities: run,
-//           });
-//         } else {
-//           res.json({
-//             resp: false,
-//             msg: "No Service Found",
-//             cities: run,
-//           });
-//         }
-//       })
-//       .catch((error) => {
-//         return res.status(401).json({
-//           resp: false,
-//           msg: error,
-//         });
-//       });
-//   } catch (e) {
-//     return res.status(500).json({
-//       resp: false,
-//       msg: e,
-//     });
-//   }
-// };
 export const service_cart = async (req, res = response) => {
   try {
     const { vendorid, profileid } = req.body;
@@ -426,6 +391,200 @@ export const getalltimings = async (req, res = response) => {
       });
   } catch (e) {
     console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+//get  all servicees bookings
+export const get_all_service_bookings = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const select = `SELECT * FROM booking WHERE profileid='${profileid}' ORDER BY id DESC`;
+
+    pool
+      .query(select, (error, rr, fields) => {
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        const responseData = [];
+
+        // Iterate through the results and execute Query 2 for each element
+        rr.forEach((row) => {
+          pool.query(
+            `SELECT * FROM vendor WHERE vendorid='${row.vendorid}'`,
+            (error, results, fields) => {
+              if (error) {
+                console.error(error);
+                return;
+              }
+
+              pool.query(
+                `SELECT * FROM availableseat WHERE id='${row.seatnumber}' and vendorid='${row.vendorid}' and status=1`,
+                (error, lastr, fields) => {
+                  if (error) {
+                    console.error(error);
+                    return;
+                  }
+
+                  responseData.push({
+                    bookingid: row.bookingid,
+                    name: row.name,
+                    seat_no: lastr[0].seatname,
+                    slotdate: row.slotdate,
+                    paymentmethod:
+                      row.paymentmethod == 1
+                        ? "Pay After Booking"
+                        : "Pay Before Booking",
+                    invoice: row.invoicenumber,
+                    shopno: results[0].businessname,
+                    Status: row.status,
+                    date: row.date,
+                    time: row.time,
+                  });
+                  if (responseData.length === rr.length) {
+                    res.json({
+                      resp: true,
+                      msg: "Got Details SuccessFull",
+                      services: responseData,
+                    });
+                  }
+                }
+              );
+            }
+          );
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const get_service_bookings_detail = async (req, res = response) => {
+  try {
+    const { bookingid } = req.body;
+
+    const select = `SELECT * FROM booking WHERE bookingid='${bookingid}' `;
+
+    pool
+      .query(select, (error, rr, fields) => {
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        const responseData = [];
+
+        // Iterate through the results and execute Query 2 for each element
+        rr.forEach((row) => {
+          pool.query(
+            `SELECT * FROM vendor WHERE vendorid='${row.vendorid}'`,
+            (error, results, fields) => {
+              if (error) {
+                console.error(error);
+                return;
+              }
+
+              pool.query(
+                `SELECT * FROM availableseat WHERE id='${row.seatnumber}' and vendorid='${row.vendorid}' and status=1`,
+                (error, lastr, fields) => {
+                  if (error) {
+                    console.error(error);
+                    return;
+                  }
+                  pool.query(
+                    `SELECT * FROM bookingtime WHERE id='${row.slottime}' and status=1`,
+                    (error, booktime, fields) => {
+                      if (error) {
+                        console.error(error);
+                        return;
+                      }
+                      pool.query(
+                        `SELECT * FROM cart WHERE profileid='${row.profileid}' and id='${row.cartid}' and status=1`,
+                        (error, cart, fields) => {
+                          if (error) {
+                            console.error(error);
+                            return;
+                          }
+                          pool.query(
+                            `SELECT * FROM user_address WHERE addressid='${row.address}' and profileid='${row.profileid}'`,
+                            (error, addrs, fields) => {
+                              if (error) {
+                                console.error(error);
+                                return;
+                              }
+
+                              responseData.push({
+                                name: row.name,
+                                email: row.email,
+                                phone: row.phone,
+                                address: addrs,
+                                bookingtime: booktime[0].name,
+                                slotdate: row.slotdate,
+
+                                paymentmethod:
+                                  row.paymentmethod == 1
+                                    ? "Pay After Booking"
+                                    : "Pay Before Booking",
+                                status: row.status,
+
+                                cart: cart,
+                                total: row.total,
+                                walletamount: row.walletamount,
+                                bookingfee: "Free",
+                                totalamount: row.totalamount,
+                                vendorimage: results[0].shopphoto,
+                                vendorname: results[0].businessname,
+                                vendoraddress: results[0].address,
+                                vendoremail: results[0].email,
+                                vendorphone: results[0].phone,
+
+                                seat_name: lastr[0].seatname,
+                                seat_image: lastr[0].image,
+
+                                date: row.date,
+                                time: row.time,
+                              });
+                              if (responseData.length === rr.length) {
+                                res.json({
+                                  resp: true,
+                                  msg: "Got Details SuccessFull",
+                                  services: responseData[0],
+                                });
+                              }
+                            }
+                          );
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          );
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
     return res.status(500).json({
       resp: false,
       msg: e,
