@@ -43,6 +43,7 @@ export const loginController = async (req, res = response) => {
           image: user.profileimage,
           email: user.email,
           mainId: user.profileid,
+          referId: user.jdbdid,
           type: "user",
         },
         token,
@@ -82,6 +83,7 @@ export const loginController = async (req, res = response) => {
                   : user.category == "book-a-services"
                   ? "service_vendor"
                   : "product_vendor",
+              referId: user.refferalcode,
             },
             token,
           });
@@ -112,6 +114,7 @@ export const loginController = async (req, res = response) => {
                   : user.category == "book-a-services"
                   ? "service_vendor"
                   : "product_vendor",
+              referId: user.refferalcode,
             },
             token,
           });
@@ -142,6 +145,7 @@ export const loginController = async (req, res = response) => {
                   : user.category == "book-a-services"
                   ? "service_vendor"
                   : "product_vendor",
+              referId: user.refferalcode,
             },
             token,
           });
@@ -609,6 +613,45 @@ export const delete_user = async (req, res = response) => {
     return res.status(500).json({
       resp: false,
       msg: "Please try later",
+    });
+  }
+};
+
+function getData(query) {
+  return new Promise((resolve, reject) => {
+    pool.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+}
+
+export const loginpagemediacontroller = async (req, res = response) => {
+  try {
+    const select = "SELECT * FROM `appmedia` ORDER BY `category` ASC";
+
+    getData(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: "Got Data",
+          media: run,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e,
     });
   }
 };

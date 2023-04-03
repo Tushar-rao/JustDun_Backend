@@ -12,6 +12,7 @@ router.post("/getmypass", login.getuser_old_pass);
 router.post("/getvendorscanner", login.getvendorscanner);
 router.post("/update_userpass", login.update_password);
 router.post("/login-product-vendor", login.product_vendor_loginController);
+router.get("/loginpagemediacontroller", login.loginpagemediacontroller);
 router.get("/renew-token-login", verifyToken, login.renewTokenLogin);
 
 export default router;

@@ -7,7 +7,7 @@ router.post("/user-stories", story.getuserconnectedstories);
 router.post("/my-story", story.getmystory);
 router.post(
   "/contacts-stories",
-  upLoadsProfile.array("attachments"),
+  upLoadsProfile.single("attachments"),
   story.putstory
 );
 // router.post(

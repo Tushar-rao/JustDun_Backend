@@ -63,7 +63,8 @@ export const product_screen_banner = async (req, res = response) => {
 //top slider all categories
 export const getproduct_main_categories = async (req, res = response) => {
   try {
-    const select = `SELECT * FROM main_category WHERE cat='Retailor' and pid='1' and status=1 ORDER BY id ASC`;
+    const { catid } = req.body;
+    const select = `SELECT * FROM main_category WHERE cat='Retailor' and maincat='${catid}' and pid='1' and status=1 ORDER BY id ASC`;
 
     pool
       .query(select)
@@ -191,6 +192,7 @@ export const get_main_all_products = async (req, res = response) => {
 
         // Iterate through the results and execute Query 2 for each element
         rr.forEach((row) => {
+          console.log(row.options);
           pool.query(
             `SELECT * FROM productimage WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}' LIMIT 1`,
             (error, results, fields) => {
@@ -317,6 +319,13 @@ export const all_products_bybrand = async (req, res = response) => {
 
       const responseData = [];
 
+      if (rr.length == 0) {
+        res.json({
+          resp: true,
+          msg: "Got Details SuccessFull",
+          services: [],
+        });
+      }
       // Iterate through the results and execute Query 2 for each element
       rr.forEach((row) => {
         pool.query(
@@ -502,7 +511,7 @@ export const get_main_productpage = async (req, res = response) => {
 
     const offerdata = [];
     const productdata = [];
-    pool
+    await pool
       .query(select, (error, offer, fields) => {
         if (error) {
           console.error(error);
@@ -510,54 +519,54 @@ export const get_main_productpage = async (req, res = response) => {
         }
 
         // Iterate through the results and execute Query 2 for each element
-        offer.forEach((eachoff) => {
-          console.log(eachoff.id);
-          pool.query(
+        offer.forEach(async (eachoff) => {
+          await pool.query(
             `SELECT * FROM products WHERE categoryid='${catid}' and exclusiveoffer='${eachoff.id}' and vendortype=1 and status=1 ORDER BY id DESC`,
-            (error, rr, fields) => {
+            async (error, rr, fields) => {
               if (error) {
                 console.error(error);
                 return;
               }
 
-              // productdata.push(rr);
+              rr.forEach(async (eachrr) => {
+                await pool.query(
+                  `SELECT * FROM productimage WHERE skucode='${eachrr.skucode}' and vendorid='${eachrr.vendorid}' LIMIT 1`,
+                  async (error, results, fields) => {
+                    if (error) {
+                      console.error(error);
+                      return;
+                    }
 
-              offerdata.push({
-                mainoffer: eachoff,
-                products: rr.map((row) => {
-                  return {
-                    maindata: row,
-                    img: [],
-                  };
-                  // pool.query(
-                  //   `SELECT * FROM productimage WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}' LIMIT 1`,
-                  //   (error, results, fields) => {
-                  //     if (error) {
-                  //       console.error(error);
-                  //       return;
-                  //     }
+                    await pool.query(
+                      `SELECT * FROM productsize WHERE skucode='${eachrr.skucode}' and options='${eachrr.options}'`,
+                      (error, lastr, fields) => {
+                        if (error) {
+                          console.error(error);
+                          return;
+                        }
 
-                  //     pool.query(
-                  //       `SELECT * FROM productsize WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}'`,
-                  //       (error, lastr, fields) => {
-                  //         if (error) {
-                  //           console.error(error);
-                  //           return;
-                  //         }
+                        offerdata.push({
+                          mainoffer: eachoff,
+                          products: rr.map((row) => {
+                            return {
+                              maindata: row,
+                              img: results[0],
+                              weight: lastr,
+                            };
+                          }),
+                        });
 
-                  //         return {
-                  //           maindata: row,
-                  //           img: results[0],
-                  //           condition: {
-                  //             main: row.options,
-                  //             conditiondetails: lastr,
-                  //           },
-                  //         };
-                  //       }
-                  //     );
-                  //   }
-                  // );
-                }),
+                        if (offerdata.length == offer.length) {
+                          res.json({
+                            resp: true,
+                            msg: "Got Details SuccessFull",
+                            services: offerdata,
+                          });
+                        }
+                      }
+                    );
+                  }
+                );
               });
 
               // if (productdata.length == rr.length) {
@@ -573,16 +582,64 @@ export const get_main_productpage = async (req, res = response) => {
               //   productdata.splice(0, productdata.length);
               //   // productdata.length = 0;
               // }
-
-              if (offerdata.length == offer.length) {
-                res.json({
-                  resp: true,
-                  msg: "Got Details SuccessFull",
-                  services: offerdata,
-                });
-              }
             }
           );
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const main_screen_shopbybrand = async (req, res = response) => {
+  try {
+    const select = `SELECT * FROM brand WHERE vendortype='Retailor' and status=1 ORDER BY id DESC`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: "Got Brands SuccessFull",
+          data: run,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const getproduct_cart = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const select = `SELECT * FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and status=0`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: "Got Category SuccessFull",
+          data: run,
         });
       })
       .catch((error) => {

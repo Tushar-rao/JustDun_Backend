@@ -6,6 +6,7 @@ var storageProfile = multer.diskStorage({
     cb(null, "src/Uploads/Stories");
   },
   filename: (req, file, cb) => {
+    console.log(file);
     cb(
       null,
       file.fieldname + "-" + Date.now() + path.extname(file.originalname)

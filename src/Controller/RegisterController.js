@@ -125,6 +125,7 @@ export const registerUser = async (req, res = response) => {
             image: user.profileimage,
             email: user.email,
             mainId: user.profileid,
+            referId: user.jdbdid,
             type: "user",
           },
           token,

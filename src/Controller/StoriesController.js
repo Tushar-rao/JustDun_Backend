@@ -39,17 +39,18 @@ export const putstory = async (req, res = response) => {
       givenvalue(main_id)[0].firstname ||
       givenvalue(main_id)[0].name;
 
-    await req.files.forEach((image) => {
-      pool.query(
-        `INSERT INTO public_story ( main_id,user_name,attachment,attachment_type) VALUES ('${main_id}','${main_name}','${
-          image.filename
-        }','${
-          image.mimetype == "application/pdf"
-            ? "pdf"
-            : image.mimetype.split("/")[0]
-        }')`
-      );
-    });
+    const image = req.file;
+
+    console.log("storyuploaded", image);
+    pool.query(
+      `INSERT INTO public_story ( main_id,user_name,attachment,attachment_type) VALUES ('${main_id}','${main_name}','${
+        image.filename
+      }','${
+        image.mimetype == "application/pdf"
+          ? "pdf"
+          : image.mimetype.split("/")[0]
+      }')`
+    );
 
     res.json({
       resp: true,

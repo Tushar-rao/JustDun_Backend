@@ -12,7 +12,7 @@ router.post("/add-new-products", product.getproducthomescreen);
 router.post("/product_screen_banner", product.product_screen_banner);
 
 //main categories at top bar
-router.get("/getmainproduct-category", product.getproduct_main_categories);
+router.post("/getmainproduct-category", product.getproduct_main_categories);
 
 //dropdowns
 router.post("/select-product-main-category", product.select_product_main);
@@ -31,5 +31,7 @@ router.post("/all_products_bybrand", product.all_products_bybrand);
 router.post("/product_details", product.product_details);
 
 router.post("/getmainproduct-page", product.get_main_productpage);
+router.get("/main_screen_shopbybrand", product.main_screen_shopbybrand);
+router.post("/getproduct_cart", product.getproduct_cart);
 
 export default router;

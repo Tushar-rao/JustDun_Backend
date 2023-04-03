@@ -12,6 +12,7 @@ router.post("/get-chat", location.getchats);
 router.post("/get-detailed-chat", location.getspecific_chats);
 router.post("/get-detailed-contacts", location.getspecific_contacts);
 router.post("/get-appcontacts", location.getappcontacts);
+router.post("/get-userconnecitons", location.getuserconnections);
 router.post(
   "/sendmsg",
   upLoadsProducts.array("attachment"),

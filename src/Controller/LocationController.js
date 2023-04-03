@@ -276,6 +276,42 @@ export const getspecific_contacts = async (req, res = response) => {
   }
 };
 
+export const getuserconnections = async (req, res = response) => {
+  try {
+    const { user_id } = req.body;
+
+    const userquery = `SELECT * FROM users WHERE refferalcode='${user_id}' and status=1 `;
+    const vendorquery = `SELECT * FROM vendor WHERE refferalcode='${user_id}' and status=1 `;
+
+    const userdb = await getData(userquery).then((row) => {
+      return row;
+    });
+    const vendordb = await getData(vendorquery).then((row) => {
+      return row;
+    });
+
+    let alldb = [...userdb, ...vendordb];
+
+    res.json({
+      resp: true,
+      msg: "Got List SuccessFull",
+      list: alldb.map((i) => {
+        return {
+          name: i.businessname || i.firstname || i.name,
+          mainid: i.profileid || i.vendorid,
+          image: i.profileimage || i.shopphoto || "",
+        };
+      }),
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
 export const getappcontacts = async (req, res = response) => {
   try {
     const { phonelist } = req.body;
