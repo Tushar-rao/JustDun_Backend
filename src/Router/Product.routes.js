@@ -30,6 +30,9 @@ router.post("/all_products_bybrand", product.all_products_bybrand);
 //product deatils
 router.post("/product_details", product.product_details);
 
+// ADD TO CART
+router.post("/add_product_tocart", product.add_product_tocart);
+
 router.post("/getmainproduct-page", product.get_main_productpage);
 router.get("/main_screen_shopbybrand", product.main_screen_shopbybrand);
 router.post("/getproduct_cart", product.getproduct_cart);

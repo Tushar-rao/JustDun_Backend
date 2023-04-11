@@ -79,37 +79,41 @@ export const mainservicescontroller = async (req, res = response) => {
   }
 };
 
+//all vendor listning
 export const servicesvendorcontroller = async (req, res = response) => {
   try {
-    const { cityid, areaid, mainid } = req.body;
+    const { cityid, areaid, mainid, profileid } = req.body;
     const query =
-      "SELECT * FROM vendor WHERE status=1 and category='book-a-services' and activated=1 and city='" +
-      cityid +
-      "' and area='" +
-      areaid +
-      "' and maincategory LIKE '%" +
-      mainid +
-      "%' ORDER BY id ASC";
-    getData(query)
-      .then((run) => {
-        if (run.length != 0) {
-          // {
-          //   id: run.vendorid,
-          //   BussinessName: run.businessname,
-          //   BusinessAddress: run.address,
-          //   landmark: run.landmark,
-          //   image: run.shopphoto,
-          // }
-          res.json({
-            resp: true,
-            msg: "Got Vendors SuccessFull",
-            vendors: run,
+      "SELECT * FROM vendor WHERE status = 1 " +
+      "AND category = 'book-a-services' " +
+      "AND activated = 1 " +
+      `AND city = '${cityid}' ` +
+      `AND area = '${areaid}' ` +
+      `AND maincategory LIKE CONCAT('%', '${mainid}', '%') ` +
+      "ORDER BY id ASC";
+    getData(query, { $cityid: cityid, $areaid: areaid, $mainid: mainid })
+      .then((vendors) => {
+        if (vendors.length > 0) {
+          const promises = vendors.map((vendor) => {
+            return getData(
+              `SELECT * FROM likes WHERE vendorid = '${vendor.vendorid}' AND profileid = '${profileid}'`
+            ).then((likes) => {
+              vendor.liked = likes.length > 0;
+              return vendor;
+            });
+          });
+          Promise.all(promises).then((vendorsWithLikes) => {
+            res.json({
+              resp: true,
+              msg: "Got Vendors Successfully",
+              vendors: vendorsWithLikes,
+            });
           });
         } else {
           res.json({
             resp: false,
-            msg: "No vendor Found",
-            vendors: run,
+            msg: "No Vendors Found",
+            vendors: [],
           });
         }
       })

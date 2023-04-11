@@ -547,6 +547,157 @@ export const getuser_address = async (req, res = response) => {
     });
   }
 };
+
+export const getuser_default_address = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+    const select = `SELECT * FROM user_address WHERE defaultaddress='0' AND profileid='${profileid}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Updated Successfully`,
+          data: run,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+
+export const create_new_address = async (req, res = response) => {
+  try {
+    const {
+      fullname,
+      mobilenumber,
+      addressnickname,
+      pincode,
+      address,
+      landmark,
+      state,
+      city,
+      addresstype,
+      defaultaddress,
+
+      profileid,
+    } = req.body;
+    const addressid = "ADD" + Math.floor(Math.random() * 9000 + 1000);
+
+    const select = `INSERT INTO user_address (fullname,mobilenumber,addressnickname,pincode,address,landmark,state,city,addresstype,defaultaddress,addressid,profileid) VALUES ('${fullname}','${mobilenumber}','${addressnickname}','${pincode}','${address}','${landmark}','${state}','${city}','${addresstype}','${defaultaddress}','${addressid}','${profileid}')`;
+    if (defaultaddress == 1) {
+      await pool.query(
+        `UPDATE user_address SET defaultaddress='0' WHERE profileid='${profileid}'`
+      );
+    }
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Added Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+
+export const update_my_address = async (req, res = response) => {
+  try {
+    const {
+      fullname,
+      mobilenumber,
+      addressnickname,
+      pincode,
+      address,
+      landmark,
+      state,
+      city,
+      addresstype,
+      defaultaddress,
+      addid,
+      profileid,
+    } = req.body;
+
+    const select = `UPDATE user_address SET fullname='${fullname}',mobilenumber='${mobilenumber}',addressnickname='${addressnickname}',pincode='${pincode}',address='${address}',landmark='${landmark}',state='${state}',city='${city}',addresstype='${addresstype}',defaultaddress='${defaultaddress}' WHERE id='${addid}'`;
+    if (defaultaddress == 1) {
+      await pool.query(
+        `UPDATE user_address SET defaultaddress='0' WHERE profileid='${profileid}'`
+      );
+    }
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Updated Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+
+export const delete_user_address = async (req, res = response) => {
+  try {
+    const { addid } = req.body;
+    const select = `DELETE FROM user_address WHERE id='${addid}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Deleted Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+
 export const getuser_old_pass = async (req, res = response) => {
   try {
     const { profileid } = req.body;
