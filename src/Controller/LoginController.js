@@ -806,3 +806,70 @@ export const loginpagemediacontroller = async (req, res = response) => {
     });
   }
 };
+
+export const getUserNotification = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+    const visitnotifications = await pool.query(
+      `SELECT * FROM visitnotify WHERE profileid='${profileid}' and status=1`
+    );
+    const notificationIDs = visitnotifications.map(
+      (visitnotification) => visitnotification.notify_id
+    );
+    const notifications = await pool.query(
+      `SELECT * FROM notifications WHERE account_type='users' AND status=1 AND account_id LIKE '%${profileid}%' AND notify_id IN (${notificationIDs}) ORDER BY id DESC`
+    );
+
+    res.json({
+      resp: true,
+      msg: "User Notifications",
+      notifications: notifications,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e.message,
+    });
+  }
+};
+
+export const create_new_enquiry = async (req, res = response) => {
+  try {
+    const { name, email, phone, subject, message } = req.body;
+
+    const currentDate = new Date();
+    const date = currentDate.getDate();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+    const formattedDate = `${date}/${month}/${year}`;
+
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+    const seconds = currentDate.getSeconds();
+    const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+    const select = `INSERT INTO contact_enquiry (name,email,phone,subject,message,date,time) VALUES('${name}','${email}','${phone}','${subject}','${message}','${formattedDate}','${formattedTime}')`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Submitted Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};

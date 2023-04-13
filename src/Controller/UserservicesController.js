@@ -133,7 +133,7 @@ export const servicesvendorcontroller = async (req, res = response) => {
 
 export const servicedetail_categories = async (req, res = response) => {
   try {
-    const { vendorid } = req.body;
+    const { vendorid, profileid } = req.body;
     const vendorquery = `SELECT * FROM vendor WHERE vendorid='${vendorid}'`;
     const categoryquery = `SELECT * FROM main_category WHERE pid='2' ORDER BY id DESC`;
     const seatesquery = `SELECT * FROM availableseat WHERE vendorid='${vendorid}' and status=1 ORDER BY id ASC`;
@@ -148,18 +148,26 @@ export const servicedetail_categories = async (req, res = response) => {
       return row;
     });
 
+    const liked = await getData(
+      `SELECT * FROM likes WHERE vendorid = '${vendorid}' AND profileid = '${profileid}'`
+    ).then((row) => {
+      return row;
+    });
+
     const seats = await getData(seatesquery).then((row) => {
       return row;
     });
     const banners = await getData(bannerquery).then((row) => {
       return row;
     });
+    console.log();
     // const cancelled_price = [...cancelled];
 
     res.json({
       resp: true,
       msg: "Got Services SuccessFull",
       services: reqcat.filter((i) => catarray.includes(i.id.toString())),
+      liked: liked.length != 0 ? true : false,
       seats: seats.map((e) => {
         return e;
       }),
@@ -588,6 +596,22 @@ export const get_service_bookings_detail = async (req, res = response) => {
           msg: error,
         });
       });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const deleteUserService = async (req, res = response) => {
+  try {
+    await pool.query("DELETE FROM cart WHERE id = ?", [req.body.cartid]);
+
+    res.json({
+      resp: true,
+      msg: "Service Removed",
+    });
   } catch (e) {
     return res.status(500).json({
       resp: false,

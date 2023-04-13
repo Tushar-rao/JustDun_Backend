@@ -20,5 +20,6 @@ router.post(
   "/servicedetails-categories",
   userservices.servicedetail_categories
 );
+router.post("/deleteUserService", userservices.deleteUserService);
 
 export default router;

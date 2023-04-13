@@ -751,3 +751,21 @@ export const add_product_tocart = async (req, res = response) => {
     });
   }
 };
+
+export const removeuserproduct = async (req, res = response) => {
+  try {
+    await pool.query("DELETE FROM shoppingcart WHERE id = ?", [
+      req.body.cartid,
+    ]);
+
+    res.json({
+      resp: true,
+      msg: "Product Removed",
+    });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};

@@ -14,6 +14,8 @@ router.post("/update_my_address", login.update_my_address);
 router.post("/delete_user_address", login.delete_user_address);
 router.post("/update_userprofile", login.update_profile);
 router.post("/getmypass", login.getuser_old_pass);
+router.post("/create_new_enquiry", login.create_new_enquiry);
+router.post("/getUserNotification", login.getUserNotification);
 router.post("/getvendorscanner", login.getvendorscanner);
 router.post("/update_userpass", login.update_password);
 router.post("/login-product-vendor", login.product_vendor_loginController);
