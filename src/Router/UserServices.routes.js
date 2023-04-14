@@ -21,5 +21,6 @@ router.post(
   userservices.servicedetail_categories
 );
 router.post("/deleteUserService", userservices.deleteUserService);
+router.post("/searchvendor", userservices.searchvendorcontroller);
 
 export default router;

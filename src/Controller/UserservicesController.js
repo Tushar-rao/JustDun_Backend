@@ -619,3 +619,50 @@ export const deleteUserService = async (req, res = response) => {
     });
   }
 };
+
+//all vendor listning
+export const searchvendorcontroller = async (req, res = response) => {
+  try {
+    const { vendorname, profileid } = req.body;
+    const query =
+      `SELECT * FROM vendor WHERE businessname LIKE '%${vendorname}%' ` +
+      "ORDER BY id ASC";
+    getData(query)
+      .then((vendors) => {
+        if (vendors.length > 0) {
+          const promises = vendors.map((vendor) => {
+            return getData(
+              `SELECT * FROM likes WHERE vendorid = '${vendor.vendorid}' AND profileid = '${profileid}'`
+            ).then((likes) => {
+              vendor.liked = likes.length > 0;
+              return vendor;
+            });
+          });
+          Promise.all(promises).then((vendorsWithLikes) => {
+            res.json({
+              resp: true,
+              msg: "Got Vendors Successfully",
+              vendors: vendorsWithLikes,
+            });
+          });
+        } else {
+          res.json({
+            resp: false,
+            msg: "No Vendors Found",
+            vendors: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
