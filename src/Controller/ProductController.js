@@ -769,3 +769,64 @@ export const removeuserproduct = async (req, res = response) => {
     });
   }
 };
+
+export const get_product_booked_history = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const select = `SELECT * FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and status=1`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: "Got Products SuccessFull",
+          data: run,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const get_product_booked_details = async (req, res = response) => {
+  try {
+    const { orderid, profileid } = req.body;
+
+    const select = `SELECT * FROM shoppingcart WHERE orderid='${orderid}'`;
+
+    pool
+      .query(select)
+      .then(async (run) => {
+        res.json({
+          resp: true,
+          msg: "Got Products SuccessFull",
+          data: run[0],
+          address: await pool.query(
+            `SELECT * FROM user_address WHERE addressid='${run[0].addressid}' and profileid='${profileid}'`
+          ),
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};

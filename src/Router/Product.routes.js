@@ -35,6 +35,9 @@ router.post("/add_product_tocart", product.add_product_tocart);
 
 router.post("/removeuserproduct", product.removeuserproduct);
 
+router.post("/get_product_booked_history", product.get_product_booked_history);
+router.post("/get_product_booked_details", product.get_product_booked_details);
+
 router.post("/getmainproduct-page", product.get_main_productpage);
 router.get("/main_screen_shopbybrand", product.main_screen_shopbybrand);
 router.post("/getproduct_cart", product.getproduct_cart);

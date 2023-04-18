@@ -366,3 +366,31 @@ export const getappcontacts = async (req, res = response) => {
     });
   }
 };
+
+export const delete_chat = async (req, res = response) => {
+  try {
+    const { chatid, sender_id } = req.body;
+    const insertcart = `DELETE FROM public_chat WHERE id='${chatid}' and sender='${sender_id}'`;
+    pool
+      .query(insertcart)
+      .then((run) => {
+        return res.json({
+          resp: true,
+          msg: `Deleted Successfully`,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};

@@ -9,6 +9,7 @@ router.post("/get-areas", location.areacontroller);
 
 //chatapi
 router.post("/get-chat", location.getchats);
+router.post("/delete-chat-msg", location.delete_chat);
 router.post("/get-detailed-chat", location.getspecific_chats);
 router.post("/get-detailed-contacts", location.getspecific_contacts);
 router.post("/get-appcontacts", location.getappcontacts);
