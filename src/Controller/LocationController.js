@@ -316,6 +316,8 @@ export const getappcontacts = async (req, res = response) => {
   try {
     const { phonelist } = req.body;
 
+    console.log("phonelist to hai");
+
     const userquery = `SELECT * FROM users WHERE status=1 `;
     const vendorquery = `SELECT * FROM vendor WHERE status=1 `;
 
@@ -341,11 +343,13 @@ export const getappcontacts = async (req, res = response) => {
       resp: true,
       msg: "Got List SuccessFull",
       list: phonelist
+        .filter((i) => i.number)
         .map((i) => {
           return {
-            number: i,
-            condition: checknumber(i),
-            value: givenvalue(i).map((i) => {
+            name: i.name,
+            number: i.number,
+            condition: checknumber(i.number),
+            value: givenvalue(i.number).map((i) => {
               return {
                 name: i.businessname || i.firstname || i.name,
                 mainid: i.profileid || i.vendorid,

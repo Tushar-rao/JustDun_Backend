@@ -6,6 +6,10 @@ const router = Router();
 router.get("/service_page_slider", userservices.servicepageslider);
 router.get("/getmainservices", userservices.mainservicescontroller);
 router.post("/service-vendors", userservices.servicesvendorcontroller);
+router.post(
+  "/service-vendors-location",
+  userservices.servicesvendorbylocationcontroller
+);
 router.post("/vendorallservices", userservices.vendor_services);
 router.post("/getalltimings", userservices.getalltimings);
 router.post("/service-cart", userservices.service_cart);

@@ -131,6 +131,59 @@ export const servicesvendorcontroller = async (req, res = response) => {
   }
 };
 
+export const servicesvendorbylocationcontroller = async (
+  req,
+  res = response
+) => {
+  try {
+    const { pincode, mainid, profileid } = req.body;
+    const query =
+      "SELECT * FROM vendor WHERE status = 1 " +
+      "AND category = 'book-a-services' " +
+      "AND activated = 1 " +
+      `AND pincode = '${pincode}' ` +
+      `AND maincategory LIKE CONCAT('%', '${mainid}', '%') ` +
+      "ORDER BY id ASC";
+    getData(query, { $pincode: pincode, $mainid: mainid })
+      .then((vendors) => {
+        if (vendors.length > 0) {
+          const promises = vendors.map((vendor) => {
+            return getData(
+              `SELECT * FROM likes WHERE vendorid = '${vendor.vendorid}' AND profileid = '${profileid}'`
+            ).then((likes) => {
+              vendor.liked = likes.length > 0;
+              return vendor;
+            });
+          });
+          Promise.all(promises).then((vendorsWithLikes) => {
+            res.json({
+              resp: true,
+              msg: "Got Vendors Successfully",
+              vendors: vendorsWithLikes,
+            });
+          });
+        } else {
+          res.json({
+            resp: false,
+            msg: "No Vendors Found",
+            vendors: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
 export const servicedetail_categories = async (req, res = response) => {
   try {
     const { vendorid, profileid } = req.body;
