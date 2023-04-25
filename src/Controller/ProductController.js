@@ -486,7 +486,7 @@ export const get_main_productpage = async (req, res = response) => {
     const { catid, page_no } = req.body;
     const offset = (page_no - 1) * 20;
 
-    const select = `SELECT * FROM offers WHERE maincategory='${catid}' ORDER BY id DESC`;
+    const select = `SELECT * FROM offers WHERE maincategory='${catid}' and status=1 ORDER BY id DESC`;
 
     const offerdata = [];
     const productdata = [];
@@ -541,7 +541,7 @@ export const get_main_productpage = async (req, res = response) => {
 
 export const main_screen_shopbybrand = async (req, res = response) => {
   try {
-    const select = `SELECT * FROM brand WHERE vendortype='Retailor' and status=1 ORDER BY id DESC`;
+    const select = `SELECT * FROM brand WHERE vendortype='Retailor' and status=1 and showonhome=1 ORDER BY id DESC`;
 
     pool
       .query(select)

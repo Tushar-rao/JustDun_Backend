@@ -551,7 +551,7 @@ export const getuser_address = async (req, res = response) => {
 export const getuser_default_address = async (req, res = response) => {
   try {
     const { profileid } = req.body;
-    const select = `SELECT * FROM user_address WHERE defaultaddress='0' AND profileid='${profileid}'`;
+    const select = `SELECT * FROM user_address WHERE defaultaddress='1' AND profileid='${profileid}'`;
 
     pool
       .query(select)

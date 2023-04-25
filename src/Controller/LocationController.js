@@ -241,13 +241,13 @@ export const getspecific_contacts = async (req, res = response) => {
     pool
       .query(insertcart)
       .then((run) => {
-        return res.json({
-          resp: true,
-
-          msg: run.map((i) => {
+        const sortedMsg = run
+          .sort(
+            (a, b) => new Date(b["max(created)"]) - new Date(a["max(created)"])
+          ) // sort by max(created) in descending order
+          .map((i) => {
             return {
               message_data: i,
-
               user_data: givenvalue(i.chatroom.replace(main_id, "")).map(
                 (i) => {
                   return {
@@ -258,7 +258,10 @@ export const getspecific_contacts = async (req, res = response) => {
                 }
               ),
             };
-          }),
+          });
+        return res.json({
+          resp: true,
+          msg: sortedMsg,
         });
       })
       .catch((error) => {
