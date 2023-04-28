@@ -42,4 +42,15 @@ router.post("/getmainproduct-page", product.get_main_productpage);
 router.get("/main_screen_shopbybrand", product.main_screen_shopbybrand);
 router.post("/getproduct_cart", product.getproduct_cart);
 
+router.post(
+  "/get_specific_vendor_productpage",
+  product.get_specific_vendor_productpage
+);
+router.post(
+  "/get_products_according_vendor",
+  product.get_products_according_vendor
+);
+router.post("/get_nearby_product_shops", product.get_nearby_product_shops);
+router.post("/search_among_all_products", product.search_among_all_products);
+
 export default router;

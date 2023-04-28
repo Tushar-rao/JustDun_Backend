@@ -1,6 +1,18 @@
 import { response } from "express";
 import pool from "../Database/mysql.js";
 
+function getData(query) {
+  return new Promise((resolve, reject) => {
+    pool.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+}
+
 export const getproducthomescreen = async (req, res = response) => {
   try {
     const { name, description, price, category } = req.body;
@@ -179,17 +191,13 @@ export const get_main_all_products = async (req, res = response) => {
     const { catid, page_no } = req.body;
     const offset = (page_no - 1) * 20;
 
-    const select = `SELECT * FROM products WHERE categoryid='${catid}' and vendortype=1 and status=1 ORDER BY id DESC LIMIT ${offset}, 20`;
+    const rr = await pool.query(
+      `SELECT * FROM products WHERE categoryid='${catid}' and status=1 ORDER BY id DESC LIMIT ?, 20`,
+      [offset]
+    );
 
-    pool.query(select, async (error, rr, fields) => {
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      const responseData = [];
-
-      for (const row of rr) {
+    const responseData = await Promise.all(
+      rr.map(async (row) => {
         try {
           const [results, lastr] = await Promise.all([
             pool.query(
@@ -200,29 +208,81 @@ export const get_main_all_products = async (req, res = response) => {
             ),
           ]);
 
-          responseData.push({
+          return {
             maindata: row,
             img: results[0],
             condition: { main: row.options, conditiondetails: lastr },
-          });
+          };
         } catch (error) {
           console.error(error);
+          return null;
         }
-      }
+      })
+    );
 
-      res.json({
-        resp: true,
-        msg: "Got Details SuccessFull",
-        services: responseData,
-      });
+    res.json({
+      resp: true,
+      msg: "Got Details SuccessFull",
+      services: responseData.filter((data) => data !== null),
     });
   } catch (e) {
+    console.error(e);
     return res.status(500).json({
       resp: false,
-      msg: e,
+      msg: e.message || "Something went wrong!",
     });
   }
 };
+
+// export const get_main_all_products = async (req, res = response) => {
+//   try {
+//     const { catid, page_no } = req.body;
+//     const offset = (page_no - 1) * 20;
+
+//     const select = `SELECT * FROM products WHERE categoryid='${catid}' and vendortype=1 and status=1 ORDER BY id DESC LIMIT ${offset}, 20`;
+
+//     pool.query(select, async (error, rr, fields) => {
+//       if (error) {
+//         console.error(error);
+//         return;
+//       }
+
+//       const responseData = [];
+
+//       for (const row of rr) {
+//         try {
+//           const [results, lastr] = await Promise.all([
+//             pool.query(
+//               `SELECT * FROM productimage WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}' LIMIT 1`
+//             ),
+//             pool.query(
+//               `SELECT * FROM productsize WHERE options='${row.options}' and skucode='${row.skucode}' and vendorid='${row.vendorid}'`
+//             ),
+//           ]);
+
+//           responseData.push({
+//             maindata: row,
+//             img: results[0],
+//             condition: { main: row.options, conditiondetails: lastr },
+//           });
+//         } catch (error) {
+//           console.error(error);
+//         }
+//       }
+
+//       res.json({
+//         resp: true,
+//         msg: "Got Details SuccessFull",
+//         services: responseData,
+//       });
+//     });
+//   } catch (e) {
+//     return res.status(500).json({
+//       resp: false,
+//       msg: e,
+//     });
+//   }
+// };
 
 export const category_condition_productslist = async (req, res = response) => {
   try {
@@ -827,6 +887,228 @@ export const get_product_booked_details = async (req, res = response) => {
     return res.status(500).json({
       resp: false,
       msg: e,
+    });
+  }
+};
+
+export const get_specific_vendor_productpage = async (req, res = response) => {
+  try {
+    const { vendorid, profileid } = req.body;
+    const vendorquery = `SELECT * FROM vendor WHERE vendorid='${vendorid}'`;
+    const categoryquery = `SELECT * FROM main_category WHERE cat='Retailor' and pid='1' and status=1 ORDER BY id DESC`;
+    // const seatesquery = `SELECT * FROM availableseat WHERE vendorid='${vendorid}' and status=1 ORDER BY id ASC`;
+    // const bannerquery = `SELECT * FROM vendorbanners WHERE vendorid='${vendorid}' and status=1 ORDER BY id DESC`;
+    const maincat = await getData(vendorquery).then((d) => {
+      return d[0].maincategory;
+    });
+    const cat = maincat;
+    const catarray = cat.split(",");
+
+    const reqcat = await getData(categoryquery).then((row) => {
+      return row;
+    });
+
+    const liked = await getData(
+      `SELECT * FROM likes WHERE vendorid = '${vendorid}' AND profileid = '${profileid}'`
+    ).then((row) => {
+      return row;
+    });
+
+    const myvendor = await getData(vendorquery).then((row) => {
+      return row;
+    });
+    // const banners = await getData(bannerquery).then((row) => {
+    //   return row;
+    // });
+    // const cancelled_price = [...cancelled];
+
+    res.json({
+      resp: true,
+      msg: "Got Services SuccessFull",
+      vendordeatil: myvendor[0],
+      category: reqcat.filter((i) => catarray.includes(i.id.toString())),
+      liked: liked.length != 0 ? true : false,
+      // seats: seats.map((e) => {
+      //   return e;
+      // }),
+      // banner: banners.map((e) => {
+      //   return e;
+      // }),
+      // .map((v) => {
+      //   return { id: v.id };
+      // }),
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const get_products_according_vendor = async (req, res = response) => {
+  try {
+    const { vendorid, catid, page_no } = req.body;
+    const offset = (page_no - 1) * 20;
+
+    const result = [];
+
+    const run = await pool.query(
+      `SELECT * FROM exclusiveoffers WHERE category='${catid}' and vendorid='${vendorid}' ORDER BY id DESC`
+    );
+
+    for (const row of run) {
+      const run2 = await pool.query(
+        `SELECT * FROM offers WHERE id='${row.offercategory}' and status=1`
+      );
+      for (const row2 of run2) {
+        const offer_id = row2.id;
+        const offer_seo = row2.seo;
+        if (row.offercategory == offer_id) {
+          result.push({ myoffer: row });
+        } else {
+          null;
+        }
+      }
+    }
+
+    const rr = await pool.query(
+      `SELECT * FROM products WHERE categoryid='${catid}' and vendorid='${vendorid}' and status=1 ORDER BY id DESC LIMIT ?, 20`,
+      [offset]
+    );
+
+    const responseData = await Promise.all(
+      rr.map(async (row) => {
+        try {
+          const [results, lastr] = await Promise.all([
+            pool.query(
+              `SELECT * FROM productimage WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}' LIMIT 1`
+            ),
+            pool.query(
+              `SELECT * FROM productsize WHERE options='${row.options}' and skucode='${row.skucode}' and vendorid='${row.vendorid}'`
+            ),
+          ]);
+
+          return {
+            maindata: row,
+            img: results[0],
+            condition: { main: row.options, conditiondetails: lastr },
+          };
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
+      })
+    );
+
+    res.json({
+      resp: true,
+      msg: "Got Details SuccessFull",
+      offerimages: result,
+      services: responseData.filter((data) => data !== null),
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e.message || "Something went wrong!",
+    });
+  }
+};
+
+export const get_nearby_product_shops = async (req, res = response) => {
+  try {
+    const { mainid, profileid } = req.body;
+    const query =
+      "SELECT * FROM vendor WHERE status = 1 " +
+      "AND category = 'buy-a-product' " +
+      "AND activated = 1 " +
+      `AND maincategory LIKE CONCAT('%', '${mainid}', '%') ` +
+      "ORDER BY id ASC";
+    getData(query, { $mainid: mainid })
+      .then((vendors) => {
+        if (vendors.length > 0) {
+          const promises = vendors.map((vendor) => {
+            return getData(
+              `SELECT * FROM likes WHERE vendorid = '${vendor.vendorid}' AND profileid = '${profileid}'`
+            ).then((likes) => {
+              vendor.liked = likes.length > 0;
+              return vendor;
+            });
+          });
+          Promise.all(promises).then((vendorsWithLikes) => {
+            res.json({
+              resp: true,
+              msg: "Got Vendors Successfully",
+              vendors: vendorsWithLikes,
+            });
+          });
+        } else {
+          res.json({
+            resp: false,
+            msg: "No Vendors Found",
+            vendors: [],
+          });
+        }
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const search_among_all_products = async (req, res = response) => {
+  try {
+    const { productname } = req.body;
+
+    const rr = await pool.query(
+      `SELECT * FROM products  WHERE name LIKE '%${productname}%' and status=1 ORDER BY id DESC LIMIT ?, 20`,
+      [0]
+    );
+
+    const responseData = await Promise.all(
+      rr.map(async (row) => {
+        try {
+          const [results, lastr] = await Promise.all([
+            pool.query(
+              `SELECT * FROM productimage WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}' LIMIT 1`
+            ),
+            pool.query(
+              `SELECT * FROM productsize WHERE options='${row.options}' and skucode='${row.skucode}' and vendorid='${row.vendorid}'`
+            ),
+          ]);
+
+          return {
+            maindata: row,
+            img: results[0],
+            condition: { main: row.options, conditiondetails: lastr },
+          };
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
+      })
+    );
+
+    res.json({
+      resp: true,
+      msg: "Got Details SuccessFull",
+      products: responseData.filter((data) => data !== null),
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      resp: false,
+      msg: e.message || "Something went wrong!",
     });
   }
 };
