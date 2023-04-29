@@ -5,6 +5,7 @@ import * as login from "../Controller/LoginController.js";
 const router = Router();
 
 router.post("/login-email-id", login.loginController);
+router.post("/login-user-otp", login.loginuserwithotp);
 router.post("/delete-user", login.delete_user);
 router.post("/get-userbyid", login.getUserbyid);
 router.post("/getuser_address", login.getuser_address);

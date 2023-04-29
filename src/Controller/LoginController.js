@@ -873,3 +873,158 @@ export const create_new_enquiry = async (req, res = response) => {
     });
   }
 };
+
+export const loginuserwithotp = async (req, res = response) => {
+  try {
+    const { mobilenumber } = req.body;
+
+    const validatedUserEmail = await pool.query(
+      `SELECT * FROM users WHERE phone='${mobilenumber}' and status=1`
+    );
+
+    const validatedVendorEmail = await pool.query(
+      `SELECT * FROM vendor WHERE phone='${mobilenumber}' and status=1`
+    );
+
+    if (validatedUserEmail.length == 0 && validatedVendorEmail.length == 0) {
+      return res.status(400).json({
+        resp: false,
+        msg: "No user Found ! Please Register",
+      });
+    }
+
+    if (validatedUserEmail.length != 0) {
+      const user = validatedUserEmail[0];
+
+      let token = await generateJsonWebToken(user.profileid);
+
+      res.json({
+        resp: true,
+        msg: "Login SuccessFull",
+        user: {
+          uid: user.id,
+          firstName: user.name,
+          image: user.profileimage,
+          email: user.email,
+          mainId: user.profileid,
+          referId: user.jdbdid,
+          type: "user",
+        },
+        token,
+      });
+    } else if (validatedVendorEmail.length != 0) {
+      const user = validatedVendorEmail[0];
+
+      let vendorid = user.vendorid;
+      let activated = user.activated;
+      let remark = user.remark;
+      let token = await generateJsonWebToken(vendorid);
+
+      if (activated == 0) {
+        if (vendorid) {
+          execute(
+            `UPDATE vendor SET login_type=1 WHERE vendorid='${vendorid}'`
+          );
+          return res.json({
+            resp: true,
+            msg: "Login SuccessFull",
+            user: {
+              uid: user.id,
+              firstName: user.firstname,
+              image: user.shopphoto,
+              email: user.email,
+              mainId: user.vendorid,
+              type:
+                user.category == "buy-a-product"
+                  ? "product_vendor"
+                  : user.category == "book-a-services"
+                  ? "service_vendor"
+                  : "product_vendor",
+              referId: user.refferalcode,
+            },
+            token,
+          });
+        } else {
+          return res.status(401).json({
+            resp: false,
+            msg: "Wrong Password",
+          });
+        }
+      }
+      if (activated == 1) {
+        if (vendorid) {
+          execute(
+            `UPDATE vendor SET login_type=1 WHERE vendorid='${vendorid}'`
+          );
+          return res.json({
+            resp: true,
+            msg: "Login SuccessFull",
+            user: {
+              uid: user.id,
+              firstName: user.firstname,
+              image: user.shopphoto,
+              email: user.email,
+              mainId: user.vendorid,
+              type:
+                user.category == "buy-a-product"
+                  ? "product_vendor"
+                  : user.category == "book-a-services"
+                  ? "service_vendor"
+                  : "product_vendor",
+              referId: user.refferalcode,
+            },
+            token,
+          });
+        } else {
+          return res.status(401).json({
+            resp: false,
+            msg: "Wrong Password",
+          });
+        }
+      }
+      if (activated == 2) {
+        if (vendorid) {
+          execute(
+            `UPDATE vendor SET login_type=1 WHERE vendorid='${vendorid}'`
+          );
+          return res.json({
+            resp: true,
+            msg: "Login SuccessFull",
+            user: {
+              uid: user.id,
+              firstName: user.firstname,
+              image: user.shopphoto,
+              email: user.email,
+              mainId: user.vendorid,
+              type:
+                user.category == "buy-a-product"
+                  ? "product_vendor"
+                  : user.category == "book-a-services"
+                  ? "service_vendor"
+                  : "product_vendor",
+              referId: user.refferalcode,
+            },
+            token,
+          });
+        } else {
+          return res.status(401).json({
+            resp: false,
+            msg: "Wrong Password",
+          });
+        }
+      }
+      if (activated == 3) {
+        return res.status(401).json({
+          resp: false,
+          msg: `Your Account is Cancelled...${remark}`,
+        });
+      }
+    }
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      message: { msg: e },
+    });
+  }
+};
