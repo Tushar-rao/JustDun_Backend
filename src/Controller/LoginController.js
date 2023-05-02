@@ -1028,3 +1028,73 @@ export const loginuserwithotp = async (req, res = response) => {
     });
   }
 };
+
+export const get_share_with_friends_table = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const mainquery = await pool.query(
+      `SELECT * FROM users WHERE refferalcode='${profileid}' ORDER BY id DESC`
+    );
+
+    const data = mainquery.map((item, index) => [
+      index + 1,
+      item.profileid,
+      item.name,
+      item.phone,
+      item.date,
+      item.status,
+    ]);
+
+    const transformedData = data.reduce((acc, curr) => {
+      acc.push(curr);
+      return acc;
+    }, []);
+    res.json({
+      resp: true,
+      msg: `Got Vendor Successfully`,
+      data: transformedData,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
+
+export const get_share_earn_table = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const mainquery = await pool.query(
+      `SELECT * FROM vendor WHERE refferalcode='${profileid}' and status=1 ORDER BY id DESC`
+    );
+
+    const data = mainquery.map((item, index) => [
+      index + 1,
+      item.vendorid,
+      item.businessname,
+      item.phone,
+      item.date,
+      item.subscriptionstatus,
+    ]);
+
+    const transformedData = data.reduce((acc, curr) => {
+      acc.push(curr);
+      return acc;
+    }, []);
+    res.json({
+      resp: true,
+      msg: `Got Vendor Successfully`,
+      data: transformedData,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
