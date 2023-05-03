@@ -3,9 +3,9 @@ import { promisify } from "util";
 
 const pool = mysql.createPool({
   host: "216-10-245-91.cprapid.com",
-  user: "justd21e_appuser",
-  password: "Justdun@#525",
-  database: "justd21e_justdundata",
+  user: "justd21e_gobusiness_dun_us",
+  password: "])R?Xdm6X1#e",
+  database: "justd21e_gobusiness_dun_db",
 });
 
 pool.getConnection((err, connection) => {
