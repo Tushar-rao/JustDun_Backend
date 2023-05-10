@@ -721,37 +721,48 @@ export const add_product_tocart = async (req, res = response) => {
       const run = await pool.query(
         `SELECT * FROM shoppingcart WHERE productid = '${productid}' AND status = 0 AND profileid = '${profilesid}' AND profiletype = '${profiletype}' AND vendorid = '${vendorid}'`
       );
-      for (const data of run.rows) {
-        const allcartid = data.id;
-        const allproductid = data.productid;
-        const qty = data.quantity;
-        const allqty = qty + quantity;
+      if (run.length > 0) {
+        for (const data of run.rows) {
+          const allcartid = data.id;
+          const allproductid = data.productid;
+          const qty = data.quantity;
+          const allqty = qty + quantity;
 
-        const servicecharges1 = (prices * gst) / 100;
-        const servicecharge1 = Number(servicecharges1.toFixed(0));
-        const charge1 = servicecharge1 * allqty;
-        const price1 = prices - charge1;
-        const subtotal1 = prices * allqty;
+          const servicecharges1 = (prices * gst) / 100;
+          const servicecharge1 = Number(servicecharges1.toFixed(0));
+          const charge1 = servicecharge1 * allqty;
+          const price1 = prices - charge1;
+          const subtotal1 = prices * allqty;
 
-        if (Number(productid) === Number(allproductid)) {
-          await pool.query(
-            `UPDATE shoppingcart SET price='${price1}', charge='${charge1}', quantity='${allqty}', subtotal='${subtotal1}' WHERE id='${allcartid}'`
-          );
-          res.json({
-            resp: true,
-            msg: "Product Updated SuccessFully",
-          });
-          return;
-        } else {
-          await pool.query(
-            `INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype, vendorid, status) VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}', '${vendorid}', '${status}')`
-          );
-          res.json({
-            resp: true,
-            msg: "Product Added SuccessFully",
-          });
-          return;
+          if (Number(productid) === Number(allproductid)) {
+            await pool.query(
+              `UPDATE shoppingcart SET price='${price1}', charge='${charge1}', quantity='${allqty}', subtotal='${subtotal1}' WHERE id='${allcartid}'`
+            );
+            res.json({
+              resp: true,
+              msg: "Product Updated SuccessFully",
+            });
+            return;
+          } else {
+            await pool.query(
+              `INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype, vendorid, status) VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}', '${vendorid}', '${status}')`
+            );
+            res.json({
+              resp: true,
+              msg: "Product Added SuccessFully",
+            });
+            return;
+          }
         }
+      } else {
+        await pool.query(`INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype, vendorid, status) 
+    VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}', '${vendorid}', '${status}')`);
+        res.json({
+          resp: true,
+          msg: "Product Added SuccessFully",
+        });
+        return;
+        // Handle case where no matching records are found
       }
     } else {
       console.log("there");
