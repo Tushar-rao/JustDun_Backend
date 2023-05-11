@@ -88,7 +88,7 @@ export const servicesvendorcontroller = async (req, res = response) => {
       "AND category = 'book-a-services' " +
       "AND activated = 1 " +
       `AND city = '${cityid}' ` +
-      `AND area = '${areaid}' ` +
+      // `AND area = '${areaid}' ` +
       `AND maincategory LIKE CONCAT('%', '${mainid}', '%') ` +
       "ORDER BY id ASC";
     getData(query, { $cityid: cityid, $areaid: areaid, $mainid: mainid })
