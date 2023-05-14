@@ -31,50 +31,51 @@ const httpServer = createServer(app);
 const socketIO = new Server(httpServer, {
   cors: {
     origin: "https://justdun-backend.vercel.app",
+    methods: ["GET", "POST"],
+    transports: ["websocket", "polling"],
+    credentials: true,
   },
+  allowEIO3: true,
 });
 
 //👇🏻 Add this before the app.get() block
-try {
-  socketIO.on("connection", (socket) => {
-    console.log(`⚡: ${socket.id} user just connected!`);
 
-    socket.on("setup", (userData) => {
-      console.log("setup funciton hai chalega to", userData);
-      socket.join(userData);
-      socket.emit("connected");
-    });
+socketIO.on("connection", (socket) => {
+  console.log(`⚡: ${socket.id} user just connected!`);
 
-    socket.on("join chat", (room) => {
-      socket.join(room);
-      console.log("User Joined Room: " + room);
-    });
-
-    socket.on("new message", (newMessageRecieved) => {
-      var chatroom = newMessageRecieved.chatroom;
-      var chats = newMessageRecieved;
-      console.log("new message function", chats.receiver);
-
-      if (!chats.receiver) return console.log("chat.receiver not defined");
-
-      // chat.users.forEach((user) => {
-      // if (user._id == newMessageRecieved.sender._id) return;
-
-      socket.in(chats.receiver).emit("message recieved", newMessageRecieved);
-      // });
-    });
-
-    socket.on("typing", (room) => socket.in(room).emit("typing"));
-    socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
-
-    socket.on("disconnect", () => {
-      socket.disconnect();
-      console.log("🔥: A user disconnected");
-    });
+  socket.on("setup", (userData) => {
+    console.log("setup funciton hai chalega to", userData);
+    socket.join(userData);
+    socket.emit("connected");
   });
-} catch (err) {
-  console.log(err);
-}
+
+  socket.on("join chat", (room) => {
+    socket.join(room);
+    console.log("User Joined Room: " + room);
+  });
+
+  socket.on("new message", (newMessageRecieved) => {
+    var chatroom = newMessageRecieved.chatroom;
+    var chats = newMessageRecieved;
+    console.log("new message function", chats.receiver);
+
+    if (!chats.receiver) return console.log("chat.receiver not defined");
+
+    // chat.users.forEach((user) => {
+    // if (user._id == newMessageRecieved.sender._id) return;
+
+    socket.in(chats.receiver).emit("message recieved", newMessageRecieved);
+    // });
+  });
+
+  socket.on("typing", (room) => socket.in(room).emit("typing"));
+  socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
+
+  socket.on("disconnect", () => {
+    socket.disconnect();
+    console.log("🔥: A user disconnected");
+  });
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
