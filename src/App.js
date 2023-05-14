@@ -36,7 +36,16 @@ const socketIO = new Server(httpServer, {
 
 //👇🏻 Add this before the app.get() block
 console.log("A new client connected to the server");
+
+socketIO.on("error", (error) => {
+  console.log("Socket connection error:", error);
+});
+
 socketIO.on("connection", (socket) => {
+  socketIO.on("error", (error) => {
+    console.log("Socket connection error:", error);
+  });
+
   console.log(`⚡: ${socket.id} user just connected!`);
 
   socket.on("setup", (userData) => {
@@ -72,10 +81,6 @@ socketIO.on("connection", (socket) => {
     console.log("🔥: A user disconnected");
   });
 });
-socketIO.on("error", (error) => {
-  console.log("Socket connection error:", error);
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
