@@ -72,6 +72,9 @@ socketIO.on("connection", (socket) => {
     console.log("🔥: A user disconnected");
   });
 });
+socketIO.on("error", (error) => {
+  console.log("Socket connection error:", error);
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
