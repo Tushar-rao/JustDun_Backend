@@ -30,7 +30,7 @@ const httpServer = createServer(app);
 
 const socketIO = new Server(httpServer, {
   cors: {
-    origin: "<https://justdun-backend.vercel.app>",
+    origin: "https://justdun-backend.vercel.app",
   },
 });
 
