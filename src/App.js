@@ -28,7 +28,11 @@ const __dirname = path.dirname(__filename);
 const httpServer = createServer(app);
 // const io = new Server(httpServer);
 
-const socketIO = new Server(httpServer, {});
+const socketIO = new Server(httpServer, {
+  cors: {
+    origin: "https://justdun-backend.vercel.app",
+  },
+});
 
 //👇🏻 Add this before the app.get() block
 socketIO.on("connection", (socket) => {
