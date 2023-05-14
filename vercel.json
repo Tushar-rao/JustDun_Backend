@@ -11,5 +11,8 @@
       "src": "/(.*)",
       "dest": "/"
     }
-  ]
+  ],
+  "env": {
+    "CORS_ORIGIN": "https://justdun-backend.vercel.app"
+  }
 }
