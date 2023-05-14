@@ -36,6 +36,10 @@ router.post("/add_product_tocart", product.add_product_tocart);
 router.post("/removeuserproduct", product.removeuserproduct);
 
 router.post("/get_product_booked_history", product.get_product_booked_history);
+router.post(
+  "/get_nearbyproduct_booked_history",
+  product.get_nearbyproduct_booked_history
+);
 router.post("/get_product_booked_details", product.get_product_booked_details);
 
 router.post("/getmainproduct-page", product.get_main_productpage);
@@ -52,5 +56,6 @@ router.post(
 );
 router.post("/get_nearby_product_shops", product.get_nearby_product_shops);
 router.post("/search_among_all_products", product.search_among_all_products);
+router.post("/submitnewproductreview", product.submitnewproductreview);
 
 export default router;

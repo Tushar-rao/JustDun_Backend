@@ -1098,3 +1098,43 @@ export const get_share_earn_table = async (req, res = response) => {
     });
   }
 };
+
+export const get_refer_earn_table = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const validatedUserEmail = await pool.query(
+      `SELECT * FROM users WHERE profileid='${profileid}' and status=1`
+    );
+    const validatedUsertransactions = await pool.query(
+      `SELECT * FROM transactions WHERE profileid='${profileid}' and profiletype='user' ORDER BY id DESC`
+    );
+
+    const data = validatedUsertransactions.map((item, index) => [
+      item.txntype,
+      item.pointtype,
+      item.pointtype,
+      item.paymenttype,
+      item.balance,
+      item.date,
+    ]);
+
+    const transformedData = data.reduce((acc, curr) => {
+      acc.push(curr);
+      return acc;
+    }, []);
+
+    res.json({
+      resp: true,
+      msg: `Got Vendor Successfully`,
+      data: validatedUserEmail[0].wallets,
+      tabledata: transformedData,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};

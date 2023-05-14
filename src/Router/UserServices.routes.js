@@ -26,5 +26,7 @@ router.post(
 );
 router.post("/deleteUserService", userservices.deleteUserService);
 router.post("/searchvendor", userservices.searchvendorcontroller);
+router.post("/vendor_reviews", userservices.vendor_reviews);
+router.post("/submitnewservicereview", userservices.submitnewservicereview);
 
 export default router;

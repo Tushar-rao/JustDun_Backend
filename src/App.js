@@ -30,7 +30,7 @@ const httpServer = createServer(app);
 
 const socketIO = new Server(httpServer, {
   cors: {
-    origin: "<http://localhost:7070>",
+    origin: "<https://justdun-backend.vercel.app>",
   },
 });
 
@@ -52,6 +52,7 @@ socketIO.on("connection", (socket) => {
   socket.on("new message", (newMessageRecieved) => {
     var chatroom = newMessageRecieved.chatroom;
     var chats = newMessageRecieved;
+    console.log("new message function", chats.receiver);
 
     if (!chats.receiver) return console.log("chat.receiver not defined");
 

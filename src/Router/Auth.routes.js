@@ -17,6 +17,7 @@ router.post("/update_userprofile", login.update_profile);
 router.post("/getmypass", login.getuser_old_pass);
 router.post("/get_share_with_friends", login.get_share_with_friends_table);
 router.post("/get_share_earn_table", login.get_share_earn_table);
+router.post("/get_refer_earn_table", login.get_refer_earn_table);
 router.post("/create_new_enquiry", login.create_new_enquiry);
 router.post("/getUserNotification", login.getUserNotification);
 router.post("/getvendorscanner", login.getvendorscanner);

@@ -719,3 +719,71 @@ export const searchvendorcontroller = async (req, res = response) => {
     });
   }
 };
+
+export const vendor_reviews = async (req, res = response) => {
+  try {
+    const { vendorid } = req.body;
+    const query = `SELECT * FROM vendorreview WHERE vendorid='${vendorid}' and status=1`;
+    getData(query)
+      .then((run) => {
+        if (run.length != 0) {
+          res.json({
+            resp: true,
+            msg: "Got Reviews SuccessFull",
+            reviews: run,
+          });
+        } else {
+          res.json({
+            resp: false,
+            msg: "No Review Found",
+            reviews: run,
+          });
+        }
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const submitnewservicereview = async (req, res = response) => {
+  try {
+    const { vendorid, vendortype, rating, name, message, profileid } = req.body;
+    const options = { timeZone: "Asia/Kolkata" };
+
+    // Get the current date and time
+    const date = new Date();
+    const formattedDate = date.toLocaleDateString("en-US", options);
+    const formattedTime = date.toLocaleTimeString("en-US", options);
+
+    await pool
+      .query(
+        `INSERT INTO vendorreview (vendorid,vendortype,rating,name,message,date,time,profileid,status) VALUES ('${vendorid}','${vendortype}','${rating}','${name}','${message}','${formattedDate}','${formattedTime}','${profileid}','1')`
+      )
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: "Review Submitted",
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};

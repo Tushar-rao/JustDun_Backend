@@ -416,7 +416,7 @@ export const all_products_bybrand = async (req, res = response) => {
 //product details screen
 export const product_details = async (req, res = response) => {
   try {
-    const { skucode, vendorid } = req.body;
+    const { skucode, vendorid, profileid } = req.body;
 
     const select = `SELECT * FROM products WHERE skucode='${skucode}' and vendorid='${vendorid}'`;
 
@@ -427,21 +427,33 @@ export const product_details = async (req, res = response) => {
       }
 
       const promises = rr.map(async (row) => {
-        const [imgResults, sizeResults, colorResults, reviewResults] =
-          await Promise.all([
-            pool.query(
-              `SELECT * FROM productimage WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}'`
-            ),
-            pool.query(
-              `SELECT * FROM productsize WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}'`
-            ),
-            pool.query(
-              `SELECT * FROM productcolor WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}'`
-            ),
-            pool.query(
-              `SELECT * FROM reviews WHERE productid='${row.id}' and status=1 ORDER BY rating`
-            ),
-          ]);
+        const [
+          imgResults,
+          sizeResults,
+          colorResults,
+          reviewResults,
+          reviewCheck,
+        ] = await Promise.all([
+          pool.query(
+            `SELECT * FROM productimage WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}'`
+          ),
+          pool.query(
+            `SELECT * FROM productsize WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}'`
+          ),
+          pool.query(
+            `SELECT * FROM productcolor WHERE skucode='${row.skucode}' and vendorid='${row.vendorid}'`
+          ),
+          pool.query(
+            `SELECT * FROM reviews WHERE productid='${row.id}' and status=1 ORDER BY rating`
+          ),
+          pool.query(
+            `SELECT * FROM shoppingcart WHERE productid='${row.id}' and profileid='${profileid}' and profiletype='user' and vendorid='${vendorid}' and status=1`
+          ),
+        ]);
+
+        const firstReviewId = row.id;
+        const firstCartId = reviewCheck[0]?.productid;
+        const reviewMatch = Number(firstReviewId) === Number(firstCartId);
 
         return {
           maindata: row,
@@ -452,6 +464,7 @@ export const product_details = async (req, res = response) => {
             conditiondetails: sizeResults,
           },
           reviews: reviewResults,
+          canReview: reviewMatch,
         };
       });
 
@@ -628,11 +641,11 @@ export const main_screen_shopbybrand = async (req, res = response) => {
 
 export const getproduct_cart = async (req, res = response) => {
   try {
-    const { profileid } = req.body;
+    const { profileid, selectedcategory } = req.body;
 
-    const select = `SELECT * FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and status=0`;
+    const select = `SELECT * FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and vendortype='Retailor' and gsttype='${selectedcategory}' and status=0`;
     const subtotal = await pool.query(
-      `SELECT sum(subtotal) as subtotal FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and status=0`
+      `SELECT sum(subtotal) as subtotal FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and vendortype='Retailor' and gsttype='${selectedcategory}' and status=0`
     );
     const shipcharges = await pool.query(
       `SELECT * FROM shipping_charge WHERE id=1`
@@ -845,7 +858,36 @@ export const get_product_booked_history = async (req, res = response) => {
   try {
     const { profileid } = req.body;
 
-    const select = `SELECT * FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and status=1`;
+    const select = `SELECT * FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and vendortype='Retailor' and gsttype='GST' and status=1`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: "Got Products SuccessFull",
+          data: run,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
+    });
+  }
+};
+
+export const get_nearbyproduct_booked_history = async (req, res = response) => {
+  try {
+    const { profileid } = req.body;
+
+    const select = `SELECT * FROM shoppingcart WHERE profileid='${profileid}' and profiletype='user' and vendortype='Retailor' and gsttype='NOT-GST' and status=1`;
 
     pool
       .query(select)
@@ -1120,6 +1162,47 @@ export const search_among_all_products = async (req, res = response) => {
     return res.status(500).json({
       resp: false,
       msg: e.message || "Something went wrong!",
+    });
+  }
+};
+
+export const submitnewproductreview = async (req, res = response) => {
+  try {
+    const { productid, productname, rating, name, message, profileid } =
+      req.body;
+    const reviewid = Math.floor(Math.random() * 9000) + 1000;
+    const options = { timeZone: "Asia/Kolkata" };
+    const profiletype = "user";
+
+    // Get the current date and time
+    const date = new Date();
+    const formattedDate = date.toLocaleDateString("en-US", options);
+    const formattedTime = date.toLocaleTimeString("en-US", options);
+
+    const validatedUserEmail = await pool.query(
+      `SELECT * FROM users WHERE profileid='${profileid}' and status=1`
+    );
+
+    await pool
+      .query(
+        `INSERT INTO reviews (reviewid,productid,productname,rating,name,email,message,date,time,profileid,profiletype,status) VALUES ('${reviewid}','${productid}','${productname}','${rating}','${name}','${validatedUserEmail[0].email}','${message}','${formattedDate}','${formattedTime}','${profileid}','${profiletype}','1')`
+      )
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: "Review Submitted",
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: error,
+        });
+      });
+  } catch (e) {
+    return res.status(500).json({
+      resp: false,
+      msg: e,
     });
   }
 };
