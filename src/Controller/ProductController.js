@@ -730,6 +730,11 @@ export const add_product_tocart = async (req, res = response) => {
     const subtotal = prices * quantity;
     const status = 0;
 
+    const validatedVendorEmail = await pool.query(
+      `SELECT * FROM vendor WHERE vendorid='${vendorid}' and status=1`
+    );
+    const vendor = validatedVendorEmail[0];
+
     if (options === "None") {
       const run = await pool.query(
         `SELECT * FROM shoppingcart WHERE productid = '${productid}' AND status = 0 AND profileid = '${profilesid}' AND profiletype = '${profiletype}' AND vendorid = '${vendorid}'`
@@ -758,7 +763,7 @@ export const add_product_tocart = async (req, res = response) => {
             return;
           } else {
             await pool.query(
-              `INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype, vendorid, status) VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}', '${vendorid}', '${status}')`
+              `INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype,vendortype,gsttype vendorid, status) VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}','${vendor.vendortype}','${vendor.gsttype}', '${vendorid}', '${status}')`
             );
             res.json({
               resp: true,
@@ -768,8 +773,8 @@ export const add_product_tocart = async (req, res = response) => {
           }
         }
       } else {
-        await pool.query(`INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype, vendorid, status) 
-    VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}', '${vendorid}', '${status}')`);
+        await pool.query(`INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype,vendortype,gsttype, vendorid, status) 
+    VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}','${vendor.vendortype}','${vendor.gsttype}', '${vendorid}', '${status}')`);
         res.json({
           resp: true,
           msg: "Product Added SuccessFully",
@@ -807,8 +812,8 @@ export const add_product_tocart = async (req, res = response) => {
             });
             return;
           } else {
-            await pool.query(`INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype, vendorid, status) 
-        VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}', '${vendorid}', '${status}')`);
+            await pool.query(`INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype,vendortype,gsttype, vendorid, status) 
+        VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}','${vendor.vendortype}','${vendor.gsttype}', '${vendorid}', '${status}')`);
             res.json({
               resp: true,
               msg: "Product Added SuccessFully",
@@ -817,8 +822,8 @@ export const add_product_tocart = async (req, res = response) => {
           }
         }
       } else {
-        await pool.query(`INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype, vendorid, status) 
-        VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}', '${vendorid}', '${status}')`);
+        await pool.query(`INSERT INTO shoppingcart (cartid, productid, product, productname, productseo, productsku, productbrand, mainprice, price, gst, charge, color, options, sizeweight, stock, quantity, subtotal, profileid, profiletype,vendortype,gsttype, vendorid, status) 
+        VALUES ('${cartid}', '${productid}', '${product}', '${productname}', '${productseo}', '${productsku}', '${productbrand}', '${prices}', '${price}', '${gst}', '${charge}', '${color}', '${options}', '${sizeweight}', '${stock}', '${quantity}', '${subtotal}', '${profilesid}', '${profiletype}','${vendor.vendortype}','${vendor.gsttype}', '${vendorid}', '${status}')`);
         res.json({
           resp: true,
           msg: "Product Added SuccessFully",
