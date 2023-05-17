@@ -1112,7 +1112,7 @@ export const get_refer_earn_table = async (req, res = response) => {
 
     const data = validatedUsertransactions.map((item, index) => [
       item.txntype,
-      item.pointtype,
+      item.point,
       item.pointtype,
       item.paymenttype,
       item.balance,
