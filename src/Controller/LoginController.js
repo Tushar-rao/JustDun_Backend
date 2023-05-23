@@ -491,6 +491,33 @@ export const update_profile = async (req, res = response) => {
     });
   }
 };
+export const reset_password = async (req, res = response) => {
+  try {
+    const { newpassword, mail } = req.body;
+    const select = `UPDATE users SET password='${newpassword}' WHERE email='${mail}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Reset Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
+    });
+  }
+};
 export const update_password = async (req, res = response) => {
   try {
     const { newpassword, profileid } = req.body;
@@ -806,19 +833,29 @@ export const loginpagemediacontroller = async (req, res = response) => {
     });
   }
 };
-
 export const getUserNotification = async (req, res = response) => {
   try {
     const { profileid } = req.body;
+
+    // Get notifications from visitnotify table
     const visitnotifications = await pool.query(
       `SELECT * FROM visitnotify WHERE profileid='${profileid}' and status=1`
     );
+
+    // Extract notify_id values from visitnotifications
     const notificationIDs = visitnotifications.map(
       (visitnotification) => visitnotification.notify_id
     );
-    const notifications = await pool.query(
-      `SELECT * FROM notifications WHERE account_type='users' AND status=1 AND account_id LIKE '%${profileid}%' AND notify_id IN (${notificationIDs}) ORDER BY id DESC`
-    );
+
+    // Retrieve notifications based on criteria
+    const notifications = await pool.query(`
+      SELECT * FROM notifications
+      WHERE account_type='users'
+      AND status=1
+      AND account_id LIKE '%${profileid}%'
+      AND notify_id IN (${notificationIDs.join(",")})
+      ORDER BY id DESC
+    `);
 
     res.json({
       resp: true,
@@ -830,6 +867,35 @@ export const getUserNotification = async (req, res = response) => {
     return res.status(500).json({
       resp: false,
       msg: e.message,
+    });
+  }
+};
+
+export const delete_user_notification = async (req, res = response) => {
+  try {
+    const { notifiid, profileid } = req.body;
+
+    const select = `DELETE FROM visitnotify WHERE notify_id='${notifiid}' and profileid='${profileid}'`;
+
+    pool
+      .query(select)
+      .then((run) => {
+        res.json({
+          resp: true,
+          msg: `Deleted Successfully`,
+        });
+      })
+      .catch((error) => {
+        return res.status(401).json({
+          resp: false,
+          msg: "Something Went Wrong",
+        });
+      });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      resp: false,
+      msg: "Please try later",
     });
   }
 };
