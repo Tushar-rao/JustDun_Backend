@@ -500,14 +500,14 @@ export const get_all_service_bookings = async (req, res = response) => {
                   responseData.push({
                     bookingid: row.bookingid,
                     name: row.name,
-                    seat_no: lastr[0].seatname,
+                    seat_no: lastr[0]?.seatname,
                     slotdate: row.slotdate,
                     paymentmethod:
                       row.paymentmethod == 1
                         ? "Pay After Booking"
                         : "Pay Before Booking",
                     invoice: row.invoicenumber,
-                    shopno: results[0].businessname,
+                    shopno: results[0]?.businessname,
                     Status: row.status,
                     date: row.date,
                     time: row.time,
@@ -598,7 +598,7 @@ export const get_service_bookings_detail = async (req, res = response) => {
                                 email: row.email,
                                 phone: row.phone,
                                 address: addrs,
-                                bookingtime: booktime[0].name,
+                                bookingtime: booktime[0]?.name,
                                 slotdate: row.slotdate,
 
                                 paymentmethod:
@@ -612,14 +612,14 @@ export const get_service_bookings_detail = async (req, res = response) => {
                                 walletamount: row.walletamount,
                                 bookingfee: "Free",
                                 totalamount: row.totalamount,
-                                vendorimage: results[0].shopphoto,
-                                vendorname: results[0].businessname,
-                                vendoraddress: results[0].address,
-                                vendoremail: results[0].email,
-                                vendorphone: results[0].phone,
+                                vendorimage: results[0]?.shopphoto,
+                                vendorname: results[0]?.businessname,
+                                vendoraddress: results[0]?.address,
+                                vendoremail: results[0]?.email,
+                                vendorphone: results[0]?.phone,
 
-                                seat_name: lastr[0].seatname,
-                                seat_image: lastr[0].image,
+                                seat_name: lastr[0]?.seatname,
+                                seat_image: lastr[0]?.image,
 
                                 date: row.date,
                                 time: row.time,
